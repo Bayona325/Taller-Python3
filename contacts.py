@@ -7,7 +7,7 @@ def limpiarconsola():
     else:
         os.system('clear')
 
-def ENTERContinuar(mensaje: str = "Presione ENTER para continuar: \n -> "):
+def ENTERContinuar(mensaje: str = "\nPresione ENTER para continuar: \n -> "):
     input(mensaje)
 
 #DIC = {"ID": 1, "Nombre": "Adrian Bayona", "Telefono": "+57 3224732154", "Email": "adrianbayona325@gmail.com"}
@@ -51,32 +51,71 @@ def leerArchivoJSON(path: str, mode = 'r') -> list:
 
 def editarArchivoJSON(path: str, IDBusqueda: str, NewTelefono: str, NewEmail: str):
     try:
+        print("\n=== TODOS LOS USUARIOS ===")
         with open(path, mode='r') as file:
-            reader = json.load(file)
-            datos = list(reader)
-            print("\n=== TODOS LOS USUARIOS ===")
+            datos = json.load(file)
             for usuario in datos:
                 print(f"ID: {usuario['ID']}, Nombre: {usuario['Nombre']}, Telefono: {usuario['Telefono']}, Email: {usuario['Email']}")
-            return datos
         
-        modificado = False
+        UsuarioModificado = None
         for usuario in datos:
             if usuario['ID'] == IDBusqueda:
                 usuario['Telefono'] = NewTelefono
                 usuario['Email'] = NewEmail
-                modificado = True
+                UsuarioModificado = usuario
                 break
         
-        if not modificado:
+        if not UsuarioModificado:
             print(f'No se ha encontrado un usuario con ID: {IDBusqueda}')
             return False
         
         with open(path, mode='w') as file:
-            json.dump(usuarios, file, indent=4)
+            json.dump(datos, file, indent=4)
 
-        print(f"Los datos del usuario con ID: {IDBusqueda} han sido actualizados")
+        print("\n=== USUARIO EDITADO CON ÉXITO ===")
+        print(f"ID: {UsuarioModificado['ID']}")
+        print(f"Nombre: {UsuarioModificado['Nombre']}")
+        print(f"Teléfono (actualizado): {UsuarioModificado['Telefono']}")
+        print(f"Email (actualizado): {UsuarioModificado['Email']}")
+        
         return True
     
+    except FileNotFoundError:
+        print("Lo sentimos, el archivo no existe")
+
+def eliminarUsuarioJSON(path: str, IDBusqueda: str):
+    try:
+        print("\n=== TODOS LOS USUARIOS ===")
+        with open(path, mode='r') as file:
+            datos = json.load(file)
+            for usuario in datos:
+                print(f"ID: {usuario['ID']}, Nombre: {usuario['Nombre']}, Telefono: {usuario['Telefono']}, Email: {usuario['Email']}")
+
+        # Buscar y eliminar el usuario
+        UsuarioEliminado = None
+        nuevos_datos = []
+        for usuario in datos:
+            if usuario['ID'] == IDBusqueda:
+                UsuarioEliminado = usuario
+            else:
+                nuevos_datos.append(usuario)
+        
+        if not UsuarioEliminado:
+            print(f'\nNo se ha encontrado un usuario con ID: {IDBusqueda}')
+            return False
+        
+        # Guardar los cambios (sin el usuario eliminado)
+        with open(path, mode='w') as file:
+            json.dump(nuevos_datos, file, indent=4)
+
+        # Mostrar confirmación
+        print("\n=== USUARIO ELIMINADO CON ÉXITO ===")
+        print(f"ID: {UsuarioEliminado['ID']}")
+        print(f"Nombre: {UsuarioEliminado['Nombre']}")
+        print(f"Teléfono: {UsuarioEliminado['Telefono']}")
+        print(f"Email: {UsuarioEliminado['Email']}")
+        
+        return True
     except FileNotFoundError:
         print("Lo sentimos, el archivo no existe")
 
@@ -112,10 +151,13 @@ while True:
         editarArchivoJSON('contacts.json', IDBusqueda, NewTelefono, NewEmail)
         ENTERContinuar()
     elif opcion == "4":
+        IDBusqueda = input("Ingrese el ID del usuario que desea eliminar: \n -> ")
+        eliminarUsuarioJSON('contacts.json', IDBusqueda)
         ENTERContinuar()
     elif opcion == "5":
         print("Saliendo del programa....")
         print("Has salido del programa.")
         break
     else:
+        print("Por favor, seleccione una opcion correcta")
         ENTERContinuar()
